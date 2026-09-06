@@ -35,7 +35,8 @@ SOFTWARE.
 		<style type="text/css">#keyboardLink { position:absolute; } </style>
 		<![endif]-->
 		<script type="text/javascript" src="chart.js"></script>
-		<script type="text/javascript" src="ipa-features.js"></script>
+		<script type="text/javascript" src="addon/data.js"></script>
+		<script type="text/javascript" src="addon/tooltip.js"></script>
 	</head>
 	<body>
 		<div id="chart">
@@ -56,6 +57,11 @@ SOFTWARE.
 		<!--[if !IE]><!-->
 		<button id="loadFontBtn" type="button" onclick="loadFontStylesheet(); return false;" title="If don't have a font installed that can display all of the symbols in the IPA, click this button to load and immediately apply a font that does. Please be patient... it takes a moment to download.">Missing some symbols? Apply Doulos SIL font</button>
 		<!--<![endif]-->
+
+		<span id="soundControls">
+			<input type="checkbox" id="disableSoundsToggle" />
+			<label for="disableSoundsToggle">Désactiver les sons de prononciation</label>
+		</span>
 		
 		
 		<div id="pulmonicConsonants">
