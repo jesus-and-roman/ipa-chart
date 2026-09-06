@@ -1,215 +1,151 @@
-/* IPA chart interactive features */
+/* IPA Chart interactive pronunciation / hover information.
+ * Local assets are expected in addon/img/<slug>.png/.mp3 and
+ * addon/img/2exemple_<slug>.mp3. Edit IPA_DATA to change slugs/examples.
+ */
 (function () {
   'use strict';
 
-  var DATA = {
-    'p':  ['Voiceless bilabial plosive','p','English','spin','spɪn','Voiceless_bilabial_plosive'],
-    'b':  ['Voiced bilabial plosive','b','English','bin','bɪn','Voiced_bilabial_plosive'],
-    't':  ['Voiceless alveolar plosive','t','English','tea','tiː','Voiceless_alveolar_plosive'],
-    'd':  ['Voiced alveolar plosive','d','English','day','deɪ','Voiced_alveolar_plosive'],
-    'ʈ':  ['Voiceless retroflex plosive','t`','English','retroflex','ˈrɛtroʊflɛks','Voiceless_retroflex_plosive'],
-    'ɖ':  ['Voiced retroflex plosive','d`','English','retroflex','ˈrɛtroʊflɛks','Voiced_retroflex_plosive'],
-    'c':  ['Voiceless palatal plosive','c','English','acute','əˈkjuːt','Voiceless_palatal_plosive'],
-    'ɟ':  ['Voiced palatal plosive','J\\','English','duke','djuːk','Voiced_palatal_plosive'],
-    'k':  ['Voiceless velar plosive','k','English','key','kiː','Voiceless_velar_plosive'],
-    'ɡ':  ['Voiced velar plosive','g','English','go','goʊ','Voiced_velar_plosive'],
-    'q':  ['Voiceless uvular plosive','q','French','raclette','ʁaklɛt','Voiceless_uvular_plosive'],
-    'ɢ':  ['Voiced uvular plosive','G','French','gargarisme','ɡaʁɡaʁism','Voiced_uvular_plosive'],
-    'ʔ':  ['Glottal stop','?','English','uh-oh','ʌʔoʊ','Glottal_stop'],
-    'm':  ['Voiced bilabial nasal','m','English','me','miː','Voiced_bilabial_nasal'],
-    'ɱ':  ['Voiced labiodental nasal','m\\','English','symphony','ˈsɪmfəni','Voiced_labiodental_nasal'],
-    'n':  ['Voiced alveolar nasal','n','English','no','noʊ','Voiced_alveolar_nasal'],
-    'ɳ':  ['Voiced retroflex nasal','n`','English','retroflex','ˈrɛtroʊflɛks','Voiced_retroflex_nasal'],
-    'ɲ':  ['Voiced palatal nasal','J','Spanish','niño','ˈniɲo','Voiced_palatal_nasal'],
-    'ŋ':  ['Voiced velar nasal','N','English','sing','sɪŋ','Voiced_velar_nasal'],
-    'ɴ':  ['Voiced uvular nasal','N\\','French','ranger','ʁɑ̃ʒe','Voiced_uvular_nasal'],
-    'ʙ':  ['Bilabial trill','B\\','Spanish','perro','ˈpero','Bilabial_trill'],
-    'r':  ['Alveolar trill','r','Spanish','perro','ˈpero','Alveolar_trill'],
-    'ʀ':  ['Uvular trill','R','French','rouge','ʁuʒ','Uvular_trill'],
-    'ⱱ':  ['Labiodental flap','P\\','English','very','ˈvɛɹi','Labiodental_flap'],
-    'ɾ':  ['Alveolar tap','4','English','water','ˈwɔɾɚ','Alveolar_tap'],
-    'ɽ':  ['Retroflex flap','r`','English','retroflex','ˈrɛtroʊflɛks','Retroflex_flap'],
-    'ɸ':  ['Voiceless bilabial fricative','p\\','English','bilabial','ˌbaɪlæbiəl','Voiceless_bilabial_fricative'],
-    'β':  ['Voiced bilabial fricative','B','Spanish','lobo','ˈloβo','Voiced_bilabial_fricative'],
-    'f':  ['Voiceless labiodental fricative','f','English','fee','fiː','Voiceless_labiodental_fricative'],
-    'v':  ['Voiced labiodental fricative','v','English','vee','viː','Voiced_labiodental_fricative'],
-    'θ':  ['Voiceless dental fricative','T','English','think','θɪŋk','Voiceless_dental_fricative'],
-    'ð':  ['Voiced dental fricative','D','English','this','ðɪs','Voiced_dental_fricative'],
-    's':  ['Voiceless alveolar fricative','s','English','see','siː','Voiceless_alveolar_fricative'],
-    'z':  ['Voiced alveolar fricative','z','English','zee','ziː','Voiced_alveolar_fricative'],
-    'ʃ':  ['Voiceless postalveolar fricative','S','English','sheep','ʃiːp','Voiceless_postalveolar_fricative'],
-    'ʒ':  ['Voiced postalveolar fricative','Z','English','vision','ˈvɪʒən','Voiced_postalveolar_fricative'],
-    'ʂ':  ['Voiceless retroflex fricative','s`','English','retroflex','ˈrɛtroʊflɛks','Voiceless_retroflex_fricative'],
-    'ʐ':  ['Voiced retroflex fricative','z`','English','retroflex','ˈrɛtroʊflɛks','Voiced_retroflex_fricative'],
-    'ç':  ['Voiceless palatal fricative','C','German','ich','ɪç','Voiceless_palatal_fricative'],
-    'ʝ':  ['Voiced palatal fricative','j\\','Spanish','yo','ʝo','Voiced_palatal_fricative'],
-    'x':  ['Voiceless velar fricative','x','Spanish','jamón','xaˈmon','Voiceless_velar_fricative'],
-    'ɣ':  ['Voiced velar fricative','G','Spanish','agua','ˈaɣwa','Voiced_velar_fricative'],
-    'χ':  ['Voiceless uvular fricative','X','French','jota','ʒɔta','Voiceless_uvular_fricative'],
-    'ʁ':  ['Voiced uvular fricative','R','French','rouge','ʁuʒ','Voiced_uvular_fricative'],
-    'ħ':  ['Voiceless pharyngeal fricative','X\\','Arabic','Hassan','ħasan','Voiceless_pharyngeal_fricative'],
-    'ʕ':  ['Voiced pharyngeal fricative','?\\','Arabic','Arabic','ʕarabi','Voiced_pharyngeal_fricative'],
-    'h':  ['Voiceless glottal fricative','h','English','he','hiː','Voiceless_glottal_fricative'],
-    'ɦ':  ['Voiced glottal fricative','h\\','English','ahead','əˈhɛd','Voiced_glottal_fricative'],
-    'ɬ':  ['Voiceless alveolar lateral fricative','K','Welsh','Llanelli','ɬaˈnɛɬi','Voiceless_alveolar_lateral_fricative'],
-    'ɮ':  ['Voiced alveolar lateral fricative','K\\','Welsh','Welsh','wɛlʃ','Voiced_alveolar_lateral_fricative'],
-    'ʋ':  ['Labiodental approximant','P','English','very','ˈvɛɹi','Labiodental_approximant'],
-    'ɹ':  ['Alveolar approximant','r\\','English','red','ɹɛd','Alveolar_approximant'],
-    'ɻ':  ['Retroflex approximant','r\\`','English','right','ɹaɪt','Retroflex_approximant'],
-    'j':  ['Palatal approximant','j','English','yes','jɛs','Palatal_approximant'],
-    'ɰ':  ['Velar approximant','M\\','Spanish','agua','ˈaɣwa','Velar_approximant'],
-    'l':  ['Alveolar lateral approximant','l','English','leaf','liːf','Alveolar_lateral_approximant'],
-    'ɭ':  ['Retroflex lateral approximant','l`','English','retroflex','ˈrɛtroʊflɛks','Retroflex_lateral_approximant'],
-    'ʎ':  ['Palatal lateral approximant','L','Spanish','llama','ˈʎama','Palatal_lateral_approximant'],
-    'ʟ':  ['Velar lateral approximant','L\\','English','velar','ˈviːlər','Velar_lateral_approximant'],
-    'ʘ':  ['Bilabial click','O\\','English','click','klɪk','Bilabial_click'],
-    'ɓ':  ['Voiced bilabial implosive','b_<','English','implosive','ɪmˈploʊsɪv','Voiced_bilabial_implosive'],
-    'ʼ':  ['Ejective marker','_>','English','ejective','ɪˈdʒɛktɪv','Ejective'],
-    'ǀ':  ['Dental click','|\\','English','click','klɪk','Dental_click'],
-    'ɗ':  ['Voiced alveolar implosive','d_<','English','implosive','ɪmˈploʊsɪv','Voiced_alveolar_implosive'],
-    'ǃ':  ['Postalveolar click','!\\','English','click','klɪk','Postalveolar_click'],
-    'ʄ':  ['Voiced palatal implosive','J_<','English','implosive','ɪmˈploʊsɪv','Voiced_palatal_implosive'],
-    'ǂ':  ['Palatal alveolar click','=\\','English','click','klɪk','Palatal_alveolar_click'],
-    'ɠ':  ['Voiced velar implosive','g_<','English','implosive','ɪmˈploʊsɪv','Voiced_velar_implosive'],
-    'ǁ':  ['Alveolar lateral click','||\\','English','click','klɪk','Alveolar_lateral_click'],
-    'ʛ':  ['Voiced uvular implosive','G_<','English','implosive','ɪmˈploʊsɪv','Voiced_uvular_implosive'],
-    'i':  ['Close front unrounded vowel','i','English','machine','məˈʃiːn','Close_front_unrounded_vowel'],
-    'y':  ['Close front rounded vowel','y','French','tu','ty','Close_front_rounded_vowel'],
-    'ɨ':  ['Close central unrounded vowel','1','Polish','my','mɨ','Close_central_unrounded_vowel'],
-    'ʉ':  ['Close central rounded vowel','}\\','Swedish','nu','nʉː','Close_central_rounded_vowel'],
-    'ɯ':  ['Close back unrounded vowel','M','Turkish','kır','kɯr','Close_back_unrounded_vowel'],
-    'u':  ['Close back rounded vowel','u','English','food','fuːd','Close_back_rounded_vowel'],
-    'ɪ':  ['Near-close front unrounded vowel','I','English','kit','kɪt','Near-close_front_unrounded_vowel'],
-    'ʏ':  ['Near-close front rounded vowel','Y','German','müssen','ˈmʏsn̩','Near-close_front_rounded_vowel'],
-    'ʊ':  ['Near-close back rounded vowel','U','English','foot','fʊt','Near-close_back_rounded_vowel'],
-    'e':  ['Close-mid front unrounded vowel','e','English','say','seɪ','Close-mid_front_unrounded_vowel'],
-    'ø':  ['Close-mid front rounded vowel','2','French','peu','pø','Close-mid_front_rounded_vowel'],
-    'ɘ':  ['Close-mid central unrounded vowel','@\\','English','about','əˈbaʊt','Close-mid_central_unrounded_vowel'],
-    'ɵ':  ['Close-mid central rounded vowel','8','English','Swedish','swiːdɪʃ','Close-mid_central_rounded_vowel'],
-    'ɤ':  ['Close-mid back unrounded vowel','7','Vietnamese','tơ','tɤ','Close-mid_back_unrounded_vowel'],
-    'o':  ['Close-mid back rounded vowel','o','English','go','goʊ','Close-mid_back_rounded_vowel'],
-    'ə':  ['Mid central vowel','@','English','sofa','ˈsoʊfə','Mid_central_vowel'],
-    'ɛ':  ['Open-mid front unrounded vowel','E','English','bed','bɛd','Open-mid_front_unrounded_vowel'],
-    'œ':  ['Open-mid front rounded vowel','9','French','œuf','œf','Open-mid_front_rounded_vowel'],
-    'ɜ':  ['Open-mid central unrounded vowel','3','English','nurse','nɜːs','Open-mid_central_unrounded_vowel'],
-    'ɞ':  ['Open-mid central rounded vowel','3\\','English','rounded','ˈraʊndɪd','Open-mid_central_rounded_vowel'],
-    'ʌ':  ['Open-mid back unrounded vowel','V','English','strut','strʌt','Open-mid_back_unrounded_vowel'],
-    'ɔ':  ['Open-mid back rounded vowel','O','English','thought','θɔːt','Open-mid_back_rounded_vowel'],
-    'æ':  ['Near-open front unrounded vowel','{','English','cat','kæt','Near-open_front_unrounded_vowel'],
-    'ɐ':  ['Near-open central vowel','6','German','bitte','ˈbɪtə','Near-open_central_vowel'],
-    'a':  ['Open front unrounded vowel','a','Spanish','casa','ˈkasa','Open_front_unrounded_vowel'],
-    'ɶ':  ['Open front rounded vowel','&','French','œil','œj','Open_front_rounded_vowel'],
-    'ɑ':  ['Open back unrounded vowel','A','English','father','ˈfɑːðər','Open_back_unrounded_vowel'],
-    'ɒ':  ['Open back rounded vowel','Q','English','lot','lɒt','Open_back_rounded_vowel']
+  var IPA_DATA = {
+    'p': {name:'Voiceless bilabial plosive', xsampa:'p', slug:'p', wiki:'Voiceless bilabial plosive', lang:'English', word:'spin', transcription:'[spɪn]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'b': {name:'Voiced bilabial plosive', xsampa:'b', slug:'b', wiki:'Voiced bilabial plosive', lang:'English', word:'bin', transcription:'[bɪn]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    't': {name:'Voiceless alveolar plosive', xsampa:'t', slug:'t', wiki:'Voiceless alveolar plosive', lang:'English', word:'tea', transcription:'[tiː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'd': {name:'Voiced alveolar plosive', xsampa:'d', slug:'d', wiki:'Voiced alveolar plosive', lang:'English', word:'dee', transcription:'[diː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'k': {name:'Voiceless velar plosive', xsampa:'k', slug:'k', wiki:'Voiceless velar plosive', lang:'English', word:'key', transcription:'[kiː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɡ': {name:'Voiced velar plosive', xsampa:'g', slug:'g', wiki:'Voiced velar plosive', lang:'English', word:'go', transcription:'[ɡoʊ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ʔ': {name:'Glottal stop', xsampa:'?', slug:'glottal-stop', wiki:'Glottal stop', lang:'English', word:'uh-oh', transcription:'[ʔʌʔoʊ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'm': {name:'Bilabial nasal', xsampa:'m', slug:'m', wiki:'Bilabial nasal', lang:'English', word:'me', transcription:'[miː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'n': {name:'Alveolar nasal', xsampa:'n', slug:'n', wiki:'Alveolar nasal', lang:'English', word:'knee', transcription:'[niː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ŋ': {name:'Velar nasal', xsampa:'N', slug:'ng', wiki:'Voiced velar nasal', lang:'English', word:'sing', transcription:'[sɪŋ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'f': {name:'Voiceless labiodental fricative', xsampa:'f', slug:'f', wiki:'Voiceless labiodental fricative', lang:'English', word:'fee', transcription:'[fiː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'v': {name:'Voiced labiodental fricative', xsampa:'v', slug:'v', wiki:'Voiced labiodental fricative', lang:'English', word:'vee', transcription:'[viː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    's': {name:'Voiceless alveolar fricative', xsampa:'s', slug:'s', wiki:'Voiceless alveolar fricative', lang:'English', word:'see', transcription:'[siː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'z': {name:'Voiced alveolar fricative', xsampa:'z', slug:'z', wiki:'Voiced alveolar fricative', lang:'English', word:'zee', transcription:'[ziː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ʃ': {name:'Voiceless postalveolar fricative', xsampa:'S', slug:'sh', wiki:'Voiceless postalveolar fricative', lang:'English', word:'sheep', transcription:'[ˈʃiːp]', wordLink:'https://en.wikipedia.org/wiki/English_orthography'},
+    'ʒ': {name:'Voiced postalveolar fricative', xsampa:'Z', slug:'zh', wiki:'Voiced postalveolar fricative', lang:'English', word:'vision', transcription:'[ˈvɪʒən]', wordLink:'https://en.wikipedia.org/wiki/English_orthography'},
+    'θ': {name:'Voiceless dental fricative', xsampa:'T', slug:'theta', wiki:'Voiceless dental fricative', lang:'English', word:'think', transcription:'[θɪŋk]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ð': {name:'Voiced dental fricative', xsampa:'D', slug:'eth', wiki:'Voiced dental fricative', lang:'English', word:'this', transcription:'[ðɪs]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'h': {name:'Voiceless glottal fricative', xsampa:'h', slug:'h', wiki:'Voiceless glottal fricative', lang:'English', word:'he', transcription:'[hiː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'l': {name:'Alveolar lateral approximant', xsampa:'l', slug:'l', wiki:'Voiced dental, alveolar and postalveolar lateral approximants', lang:'English', word:'lee', transcription:'[liː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɹ': {name:'Voiced alveolar approximant', xsampa:'r\\', slug:'r', wiki:'Voiced alveolar and postalveolar approximants', lang:'English', word:'red', transcription:'[ɹɛd]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'j': {name:'Palatal approximant', xsampa:'j', slug:'j', wiki:'Palatal approximant', lang:'English', word:'yes', transcription:'[jɛs]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'w': {name:'Voiced labial–velar approximant', xsampa:'w', slug:'w', wiki:'Voiced labial–velar approximant', lang:'English', word:'we', transcription:'[wiː]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'i': {name:'Close front unrounded vowel', xsampa:'i', slug:'i', wiki:'Close front unrounded vowel', lang:'English', word:'machine', transcription:'[məˈʃiːn]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'u': {name:'Close back rounded vowel', xsampa:'u', slug:'u', wiki:'Close back rounded vowel', lang:'English', word:'food', transcription:'[fuːd]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'e': {name:'Close-mid front unrounded vowel', xsampa:'e', slug:'e', wiki:'Close-mid front unrounded vowel', lang:'Spanish', word:'mesa', transcription:'[ˈmesa]', wordLink:'https://en.wikipedia.org/wiki/Spanish_phonology'},
+    'o': {name:'Close-mid back rounded vowel', xsampa:'o', slug:'o', wiki:'Close-mid back rounded vowel', lang:'Spanish', word:'como', transcription:'[ˈkomo]', wordLink:'https://en.wikipedia.org/wiki/Spanish_phonology'},
+    'ə': {name:'Mid central vowel', xsampa:'@', slug:'schwa', wiki:'Mid central vowel', lang:'English', word:'about', transcription:'[əˈbaʊt]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɛ': {name:'Open-mid front unrounded vowel', xsampa:'E', slug:'epsilon', wiki:'Open-mid front unrounded vowel', lang:'English', word:'bed', transcription:'[bɛd]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɔ': {name:'Open-mid back rounded vowel', xsampa:'O', slug:'open-o', wiki:'Open-mid back rounded vowel', lang:'English', word:'thought', transcription:'[θɔːt]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'æ': {name:'Near-open front unrounded vowel', xsampa:'{', slug:'ae', wiki:'Near-open front unrounded vowel', lang:'English', word:'cat', transcription:'[kæt]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ʌ': {name:'Open-mid back unrounded vowel', xsampa:'V', slug:'caret', wiki:'Open-mid back unrounded vowel', lang:'English', word:'strut', transcription:'[strʌt]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɑ': {name:'Open back unrounded vowel', xsampa:'A', slug:'alpha', wiki:'Open back unrounded vowel', lang:'English', word:'father', transcription:'[ˈfɑːðəɹ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɒ': {name:'Open back rounded vowel', xsampa:'Q', slug:'turned-alpha', wiki:'Open back rounded vowel', lang:'English', word:'lot', transcription:'[lɒt]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ʈ': {name:'Voiceless retroflex plosive', xsampa:'t`', slug:'t-retroflex', wiki:'Voiceless retroflex plosive'},
+    'ɖ': {name:'Voiced retroflex plosive', xsampa:'d`', slug:'d-retroflex', wiki:'Voiced retroflex plosive'},
+    'ɟ': {name:'Voiced palatal plosive', xsampa:'J\\', slug:'j-stop', wiki:'Voiced palatal plosive'},
+    'ɡ': {name:'Voiced velar plosive', xsampa:'g', slug:'g', wiki:'Voiced velar plosive', lang:'English', word:'go', transcription:'[ɡoʊ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ɢ': {name:'Voiced uvular plosive', xsampa:'G\\', slug:'g-uvular', wiki:'Voiced uvular plosive'},
+    'ʔ': {name:'Glottal stop', xsampa:'?', slug:'glottal-stop', wiki:'Glottal stop', lang:'English', word:'uh-oh', transcription:'[ʔʌʔoʊ]', wordLink:'https://en.wikipedia.org/wiki/English_phonology'},
+    'ʘ': {name:'Bilabial click', xsampa:'O\\', slug:'bilabial-click', wiki:'Bilabial click'},
+    'ǀ': {name:'Dental click', xsampa:'|\\', slug:'dental-click', wiki:'Dental click'},
+    'ǃ': {name:'Postalveolar click', xsampa:'!\\', slug:'postalveolar-click', wiki:'Postalveolar click'},
+    'ǂ': {name:'Palatal click', xsampa:'=\\', slug:'palatal-click', wiki:'Palatal click'},
+    'ǁ': {name:'Alveolar lateral click', xsampa:'||\\', slug:'alveolar-lateral-click', wiki:'Alveolar lateral click'},
+    'ɓ': {name:'Voiced bilabial implosive', xsampa:'b_<', slug:'bilabial-implosive', wiki:'Voiced bilabial implosive'},
+    'ɗ': {name:'Voiced dental/alveolar implosive', xsampa:'d_<', slug:'dental-implosive', wiki:'Voiced dental/alveolar implosive'},
+    'ʄ': {name:'Voiced palatal implosive', xsampa:'J\_<', slug:'palatal-implosive', wiki:'Voiced palatal implosive'},
+    'ɠ': {name:'Voiced velar implosive', xsampa:'g_<', slug:'velar-implosive', wiki:'Voiced velar implosive'},
+    'ʛ': {name:'Voiced uvular implosive', xsampa:'G\_<', slug:'uvular-implosive', wiki:'Voiced uvular implosive'}
   };
 
-  function slugToLabel(slug) { return slug.replace(/_/g, ' '); }
-  function enc(s) { return encodeURIComponent(s); }
-  function makeWiki(name) { return 'https://en.wikipedia.org/wiki/' + name; }
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
-
-  function getData(symbol) {
-    var d = DATA[symbol];
-    if (!d) return null;
-    return { name:d[0], xsampa:d[1], lang:d[2], word:d[3], wordIpa:d[4], slug:d[5] };
+  function esc(s){return String(s == null ? '' : s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function slugifySymbol(symbol){
+    if(IPA_DATA[symbol]) return IPA_DATA[symbol].slug;
+    return symbol.normalize ? symbol.normalize('NFKD').replace(/[\u0300-\u036f]/g,'') : symbol;
   }
-
-  function markNodes() {
-    var root = document;
-    ['pulmonicConsonants','nonPulmonicConsonants','vowelSymbols'].forEach(function (id) {
-      var section = root.getElementById(id);
-      if (!section) return;
-      var nodes = section.querySelectorAll('span, td');
-      for (var i=0;i<nodes.length;i++) {
-        var node = nodes[i];
-        var text = (node.textContent || '').replace(/[\s\u25CC]/g, '');
-        if (text.length === 1 && DATA[text] && !node.classList.contains('impossible')) {
-          node.classList.add('ipa-feature');
-          node.setAttribute('data-ipa-symbol', text);
-          node.setAttribute('data-ipa-name', DATA[text][0]);
-        }
-      }
-    });
+  function infoFor(symbol, el){
+    var d=IPA_DATA[symbol];
+    if(!d) d={name:(el.getAttribute('title')||'IPA symbol').replace(/^U\+[0-9A-F]+:\s*/i,''),xsampa:'',slug:slugifySymbol(symbol),wiki:symbol};
+    return d;
   }
+  function localAudio(d){return 'addon/img/'+encodeURIComponent(d.slug)+'.mp3';}
+  function exampleAudio(d){return 'addon/img/2exemple_'+encodeURIComponent(d.slug)+'.mp3';}
 
-  function makeTooltip() {
-    var tip = document.getElementById('ipaFeatureTooltip');
-    if (tip) return tip;
-    tip = document.createElement('div');
-    tip.id = 'ipaFeatureTooltip';
-    tip.setAttribute('role','tooltip');
-    tip.innerHTML = '<div class="ipa-tooltip-title"></div><img class="ipa-mouth-image" alt="Position de la bouche" /><div class="ipa-tooltip-copy"></div><div class="ipa-tooltip-xsampa"></div><a class="ipa-tooltip-wiki" target="_blank" rel="noopener"></a><div class="ipa-tooltip-example"></div>';
-    document.body.appendChild(tip);
-    return tip;
-  }
-
-  function showTooltip(node, e) {
-    var d = getData(node.getAttribute('data-ipa-symbol'));
-    if (!d) return;
-    var tip = makeTooltip();
-    tip.querySelector('.ipa-tooltip-title').textContent = d.name;
-    var img = tip.querySelector('.ipa-mouth-image');
-    img.src = 'addon/img/' + d.slug + '.png';
-    img.onerror = function(){ this.style.display='none'; };
-    img.onload = function(){ this.style.display='block'; };
-    img.style.display='block';
-    tip.querySelector('.ipa-tooltip-copy').innerHTML = '<strong>Copier :</strong> <button type="button" class="ipa-copy-btn">' + escapeHtml(node.textContent.trim()) + '</button>';
-    tip.querySelector('.ipa-tooltip-xsampa').innerHTML = '<strong>X-SAMPA :</strong> <code>' + escapeHtml(d.xsampa) + '</code>';
-    var wiki = tip.querySelector('.ipa-tooltip-wiki');
-    wiki.href = makeWiki(d.slug);
-    wiki.textContent = 'Wikipedia (English)';
-    tip.querySelector('.ipa-tooltip-example').innerHTML = '<div class="ipa-example-lang">' + escapeHtml(d.lang) + '</div><a class="ipa-example-word" target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/' + enc(d.word) + '">' + escapeHtml(d.word) + '</a> <span class="ipa-example-transcription">[' + escapeHtml(d.wordIpa) + ']</span><button type="button" class="ipa-example-play" title="Jouer l\'exemple">▶</button>';
-    tip.querySelector('.ipa-copy-btn').onclick = function () {
-      if (navigator.clipboard) navigator.clipboard.writeText(node.textContent.trim());
-      else { var ta=document.createElement('textarea'); ta.value=node.textContent.trim(); document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); }
-    };
-    tip.querySelector('.ipa-example-play').onclick = function () { playExample(d); };
-    tip.style.display = 'block';
-    positionTooltip(tip, e);
-  }
-
-  function positionTooltip(tip, e) {
-    var gap = 14, x = e.clientX + gap, y = e.clientY + gap;
-    var rect = tip.getBoundingClientRect();
-    if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - gap;
-    if (y + rect.height > window.innerHeight - 8) y = e.clientY - rect.height - gap;
-    tip.style.left = Math.max(8,x) + 'px'; tip.style.top = Math.max(8,y) + 'px';
-  }
-
-  function hideTooltip() { var tip=document.getElementById('ipaFeatureTooltip'); if(tip) tip.style.display='none'; }
-
-  function audioEnabled() { return localStorage.getItem('ipaSoundsEnabled') !== '0'; }
-  function playFile(slug) {
-    if (!audioEnabled()) return false;
-    var a = new Audio('addon/img/' + slug + '.mp3');
-    a.onerror = function(){ if (window.speechSynthesis) speechSynthesis.cancel(); };
-    a.play().catch(function(){});
-    return true;
-  }
-  function speak(text) {
-    if (!audioEnabled() || !window.speechSynthesis) return;
-    speechSynthesis.cancel();
-    var u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-US'; u.rate = 0.72; u.pitch = 1;
-    speechSynthesis.speak(u);
-  }
-  function playExample(d) { if (!playFile('2exemple_' + d.slug)) speak(d.word); }
-
-  function bind() {
-    markNodes();
-    var nodes = document.querySelectorAll('.ipa-feature');
-    for (var i=0;i<nodes.length;i++) {
-      (function(node){
-        node.addEventListener('mouseenter', function(e){ showTooltip(node,e); });
-        node.addEventListener('mousemove', function(e){ var tip=document.getElementById('ipaFeatureTooltip'); if(tip && tip.style.display!=='none') positionTooltip(tip,e); });
-        node.addEventListener('mouseleave', hideTooltip);
-        node.addEventListener('click', function(){ playFile(getData(node.getAttribute('data-ipa-symbol')).slug); });
-      })(nodes[i]);
+  var tip, audio, soundEnabled=true, robotEnabled=true;
+  function ensureUI(){
+    if(!tip){
+      tip=document.createElement('div'); tip.id='ipaInfoCard'; tip.setAttribute('role','tooltip'); tip.style.display='none'; document.body.appendChild(tip);
+      audio=document.createElement('audio'); audio.id='ipaLocalAudio'; audio.preload='none'; document.body.appendChild(audio);
     }
-    window.IPAFeatureData = DATA;
-    window.IPAFeaturePlay = playFile;
-    window.IPAFeatureSpeak = speak;
   }
+  function playFile(url, fallbackText){
+    if(!soundEnabled) return;
+    ensureUI(); audio.pause(); audio.src=url; audio.currentTime=0;
+    var p=audio.play();
+    if(p && p.catch) p.catch(function(){ if(robotEnabled && fallbackText) speak(fallbackText); });
+  }
+  function speak(text){
+    if(!soundEnabled || !robotEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel(); var u=new SpeechSynthesisUtterance(text); u.lang='en-US'; window.speechSynthesis.speak(u);
+  }
+  function playSymbol(symbol,d){
+    playFile(localAudio(d), symbol);
+    setTimeout(function(){
+      if(!soundEnabled || !robotEnabled || !window.speechSynthesis) return;
+      if(audio.error) speak(symbol);
+    },180);
+  }
+  function exampleRow(d){
+    if(!d.word) return '<div class="ipaNoExample">No example configured yet. Add one in <code>IPA_DATA</code>.</div>';
+    var audioId='ipa-example-'+Math.random().toString(36).slice(2);
+    return '<table class="ipaExampleTable"><tbody><tr><td><a href="https://en.wikipedia.org/wiki/'+encodeURIComponent(d.lang||'English_language').replace(/%20/g,'_')+'" target="_blank" rel="noopener">'+esc(d.lang||'English')+'</a></td><td>'+esc(d.word)+'</td><td><button type="button" class="ipaExamplePlay" data-audio="'+esc(exampleAudio(d))+'" data-text="'+esc(d.word)+'" aria-label="Play example">'+esc(d.transcription||'▶')+'</button></td></tr></tbody></table>';
+  }
+  function show(symbol,el,x,y){
+    ensureUI(); var d=infoFor(symbol,el);
+    var wiki='https://en.wikipedia.org/wiki/'+encodeURIComponent(d.wiki||d.name).replace(/%20/g,'_');
+    tip.innerHTML='<div class="ipaCardTitle">'+esc(d.name)+'</div>'+
+      '<div class="ipaCardSymbol" title="Click to copy">'+esc(symbol)+'</div>'+ 
+      '<div class="ipaCardLine"><strong>X-SAMPA:</strong> <code>'+esc(d.xsampa||'—')+'</code></div>'+ 
+      '<div class="ipaCardLine"><a target="_blank" rel="noopener" href="'+wiki+'">Wikipedia (English)</a></div>'+exampleRow(d);
+    tip.style.display='block'; position(x,y);
+    tip.querySelectorAll('.ipaExamplePlay').forEach(function(btn){btn.addEventListener('click',function(e){e.stopPropagation();playFile(this.getAttribute('data-audio'),this.getAttribute('data-text'));});});
+  }
+  function position(x,y){
+    var gap=14, left=x+gap, top=y+gap, r=tip.getBoundingClientRect();
+    if(left+r.width>window.innerWidth-8) left=Math.max(8,x-r.width-gap);
+    if(top+r.height>window.innerHeight-8) top=Math.max(8,y-r.height-gap);
+    tip.style.left=left+'px'; tip.style.top=top+'px';
+  }
+  function hide(){if(tip) tip.style.display='none';}
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind); else bind();
+  function enhance(el){
+    if(el.dataset.ipaEnhanced) return;
+    var symbol=(el.textContent||'').replace(/[\s\u25CC]/g,''); if(!symbol) return;
+    var parent=el.closest('#pulmonicConsonants,#nonPulmonicConsonants,#vowels'); if(!parent) return;
+    el.dataset.ipaEnhanced='1'; el.dataset.ipaSymbol=symbol; var d=infoFor(symbol,el);
+    el.classList.add('ipaInteractive'); el.setAttribute('data-ipa-slug',d.slug); el.setAttribute('tabindex','0');
+    el.addEventListener('mouseenter',function(e){show(symbol,el,e.clientX,e.clientY);});
+    el.addEventListener('mousemove',function(e){if(tip&&tip.style.display!=='none') position(e.clientX,e.clientY);});
+    el.addEventListener('mouseleave',hide);
+    el.addEventListener('focus',function(){var r=el.getBoundingClientRect();show(symbol,el,r.right,r.top);});
+    el.addEventListener('blur',hide);
+    el.addEventListener('click',function(e){e.preventDefault();e.stopPropagation(); playSymbol(symbol,d); copySymbol(symbol);});
+    el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();playSymbol(symbol,d);copySymbol(symbol);}});
+  }
+  function copySymbol(symbol){if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(symbol).catch(function(){});}
+  function enhanceAll(){
+    document.querySelectorAll('#pulmonicConsonants span,#pulmonicConsonants td,#nonPulmonicConsonants td,#vowels span').forEach(enhance);
+  }
+  function addSoundControls(){
+    var host=document.getElementById('soundControls'); if(host) return;
+    host=document.createElement('div'); host.id='soundControls'; host.innerHTML='<label><input id="ipaSoundsToggle" type="checkbox" checked> Jouer les sons IPA</label> <label><input id="ipaRobotToggle" type="checkbox" checked> Robot si le MP3 est absent</label> <button type="button" id="ipaStopSound">Désactiver les sons</button>';
+    var intro=document.getElementById('chartIntro'); if(intro) intro.parentNode.insertBefore(host,intro.nextSibling); else document.body.insertBefore(host,document.body.firstChild);
+    document.getElementById('ipaSoundsToggle').addEventListener('change',function(){soundEnabled=this.checked;if(!soundEnabled&&window.speechSynthesis)window.speechSynthesis.cancel();});
+    document.getElementById('ipaRobotToggle').addEventListener('change',function(){robotEnabled=this.checked;});
+    document.getElementById('ipaStopSound').addEventListener('click',function(){soundEnabled=false;document.getElementById('ipaSoundsToggle').checked=false;if(audio)audio.pause();if(window.speechSynthesis)window.speechSynthesis.cancel();});
+  }
+  function init(){ensureUI();enhanceAll();addSoundControls();}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init();
+  window.addEventListener('message',function(e){if(!e.data)return;if(e.data.type==='ipa-stop-sound'){soundEnabled=false;if(audio)audio.pause();if(window.speechSynthesis)window.speechSynthesis.cancel();}if(e.data.type==='ipa-play'&&e.data.symbol){var d=infoFor(e.data.symbol,{getAttribute:function(){return ''}});playSymbol(e.data.symbol,d);}});
+  window.IPAInteractive={data:IPA_DATA,enhance:enhanceAll,playSymbol:function(symbol){var d=infoFor(symbol,{getAttribute:function(){return ''}});playSymbol(symbol,d);},setSoundEnabled:function(v){soundEnabled=!!v;}};
 })();
