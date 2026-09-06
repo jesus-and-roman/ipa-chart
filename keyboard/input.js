@@ -34,7 +34,7 @@ var textarea_selection;
 var symbolsUsedBox;
 var useEntities = false;
 var useHex = true;
-var ipaSoundsEnabled = true;
+var playIPASounds = true;
 
 /*
 function mouseoverKey(){
@@ -42,6 +42,14 @@ function mouseoverKey(){
 	return true;
 }
 */
+
+function playSelectedIPASound(){
+	if(!playIPASounds || !pressedKey) return;
+	try {
+		if(top.IPAInteractive && top.IPAInteractive.playSymbol) top.IPAInteractive.playSymbol(pressedKey);
+		else if(top.postMessage) top.postMessage({type:'ipa-play', symbol:pressedKey}, '*');
+	} catch(e) {}
+}
 
 function engageKey(){
 	textarea.focus();
@@ -128,31 +136,12 @@ function engageKey(){
 	timer = self.setTimeout("timer = self.setInterval('writekey()', repeatRate)", repeatDelay); //\"" + (pressedKey == '"' ? '\\\\"' : (pressedKey.match(/[\n']/) ? '\\' + pressedKey : pressedKey)) + "\"
 	writekey();
 	showSymbolsUsed();
-	playSelectedSound(pressedNode);
+	playSelectedIPASound();
 
 	//if(this.nodeName.toLowerCase() == 'a'){
 	//	top.status = this.getAttribute('title');
 	//}
 };
-function playSelectedSound(node){
-	if(!ipaSoundsEnabled || !node) return;
-	var symbol = '';
-	try { symbol = (node.textContent || node.innerText || '').replace(/[\s\u25CC]/g, ''); } catch(e) {}
-	if(!symbol) return;
-	var chartWindow = (top.frames && top.frames[0]) ? top.frames[0] : top;
-	var data = chartWindow.IPAFeatureData && chartWindow.IPAFeatureData[symbol];
-	if(!data) return;
-	var audio = new Audio('../addon/img/' + data[5] + '.mp3');
-	audio.play().catch(function(){
-		if(window.speechSynthesis){
-			speechSynthesis.cancel();
-			var u = new SpeechSynthesisUtterance(data[3]);
-			u.lang = 'en-US'; u.rate = 0.72;
-			speechSynthesis.speak(u);
-		}
-	});
-}
-
 function disengageKey(){
 	pressedKey = 0;
 	self.clearInterval(timer);
@@ -196,13 +185,6 @@ function init(){
 	}
 
 	textarea = document.getElementById('inputField');
-	var soundToggle = document.getElementById('ipaSounds');
-	try { ipaSoundsEnabled = localStorage.getItem('ipaSoundsEnabled') !== '0'; } catch(e) {}
-	soundToggle.checked = ipaSoundsEnabled;
-	soundToggle.onclick = function(){
-		ipaSoundsEnabled = this.checked;
-		try { localStorage.setItem('ipaSoundsEnabled', ipaSoundsEnabled ? '1' : '0'); } catch(e) {}
-	};
 	ipawin = top.frames[0];
 	if(ipawin){
 		ipawin.document.getElementById('keyboardRefHead').style.display = 'none';
@@ -211,6 +193,10 @@ function init(){
 	}
 	symbolsUsedBox = document.getElementById('symbolsUsed');
 	useEntities = document.getElementById('insertEntities').checked;
+	var soundBox=document.getElementById('playIPASounds');
+	var muteButton=document.getElementById('muteSounds');
+	if(soundBox){ playIPASounds=soundBox.checked; soundBox.onclick=function(){playIPASounds=this.checked;}; }
+	if(muteButton){ muteButton.onclick=function(){playIPASounds=false; if(soundBox)soundBox.checked=false; try{top.postMessage({type:'ipa-stop-sound'}, '*');}catch(e){} }; }
 	document.getElementById('insertEntities').onclick = function(){useEntities = this.checked};
 	
 	//make the document unselectable so that repeated clicks don't select text

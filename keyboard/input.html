@@ -36,11 +36,12 @@ SOFTWARE.
 	<body onload="fallbackInit()">
 		<form action="javascript:" onsubmit="return false">
 			<div id="toolbar">
-				<span id="soundBox" title="Active/désactive la lecture audio des phénomènes IPA"><input id="ipaSounds" type="checkbox" checked="checked" /><label for="ipaSounds">&nbsp;Jouer les sons IPA</label></span>
 				<span id="insertEntitiesBox" title="Checking this box converts inputted Unicode characters into ASCII HTML entities">
 					<input id="insertEntities" type="checkbox" /><label for="insertEntities">&nbsp;Insert entities</label>
 				</span>
 				<input type="button" id="clearButton" onclick="clearField()" value="Clear" />
+				<label class="soundOption"><input id="playIPASounds" type="checkbox" checked="checked" /> Jouer les sons IPA</label>
+				<button type="button" id="muteSounds">Désactiver les sons</button>
 				<span id="instructions">Click on a symbol above to have it inputted below. Enter base characters before diacritics.</span>
 				<span id="symbolsUsedLabel">Previously used:</span>
 				<span id="symbolsUsed"></span>

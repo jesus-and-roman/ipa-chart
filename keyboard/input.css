@@ -50,5 +50,5 @@ span#instructions
 }
 span#symbolsUsed, span#symbolsUsedLabel{
 	display:none;
-}
-span#soundBox { background-color:#CCCCCC; padding-right:3px; border:solid 1px gray; margin-right:3px; }
+}.soundOption { margin-left: 10px; white-space: nowrap; }
+#muteSounds { margin-left: 6px; }
