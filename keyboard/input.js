@@ -34,7 +34,31 @@ var textarea_selection;
 var symbolsUsedBox;
 var useEntities = false;
 var useHex = true;
-var playIPASounds = true;
+var robotVoiceEnabled = false;
+
+/**
+ * Lit un texte (typiquement un symbole IPA ou le contenu du champ) avec une
+ * voix synthétique du navigateur ("voix robot"), via la Web Speech API.
+ */
+function speakRobotVoice(text){
+	if(!text) return;
+	if(!('speechSynthesis' in window)) return;
+	try {
+		window.speechSynthesis.cancel();
+		var utterance = new SpeechSynthesisUtterance(text);
+		utterance.rate = 0.8;
+		window.speechSynthesis.speak(utterance);
+	}
+	catch(e){}
+}
+
+/**
+ * Bouton "Lire tout" : lit à voix haute le contenu actuel du champ de saisie.
+ */
+function playAllRobotVoice(){
+	if(!textarea) return;
+	speakRobotVoice(textarea.value);
+}
 
 /*
 function mouseoverKey(){
@@ -42,14 +66,6 @@ function mouseoverKey(){
 	return true;
 }
 */
-
-function playSelectedIPASound(){
-	if(!playIPASounds || !pressedKey) return;
-	try {
-		if(top.IPAInteractive && top.IPAInteractive.playSymbol) top.IPAInteractive.playSymbol(pressedKey);
-		else if(top.postMessage) top.postMessage({type:'ipa-play', symbol:pressedKey}, '*');
-	} catch(e) {}
-}
 
 function engageKey(){
 	textarea.focus();
@@ -62,7 +78,15 @@ function engageKey(){
 		pressedKey = this.firstChild.data.replace(/\s|[\u2000-\u200A\u25CC]/g, '');
 	else
 		return;
-	
+
+	//play the recorded pronunciation (addon/sounds/{symbol}.mp3), unless sounds are disabled
+	if(ipawin && ipawin.playPhonemeSound)
+		ipawin.playPhonemeSound(pressedKey);
+
+	//read the symbol aloud with a synthetic ("robot") voice, if enabled
+	if(robotVoiceEnabled)
+		speakRobotVoice(pressedKey);
+
 	//add symbol to queue
 	if(this.nodeName.toLowerCase() != 'a'){
 		//determine if the symbol is already in the queue
@@ -136,7 +160,6 @@ function engageKey(){
 	timer = self.setTimeout("timer = self.setInterval('writekey()', repeatRate)", repeatDelay); //\"" + (pressedKey == '"' ? '\\\\"' : (pressedKey.match(/[\n']/) ? '\\' + pressedKey : pressedKey)) + "\"
 	writekey();
 	showSymbolsUsed();
-	playSelectedIPASound();
 
 	//if(this.nodeName.toLowerCase() == 'a'){
 	//	top.status = this.getAttribute('title');
@@ -193,11 +216,13 @@ function init(){
 	}
 	symbolsUsedBox = document.getElementById('symbolsUsed');
 	useEntities = document.getElementById('insertEntities').checked;
-	var soundBox=document.getElementById('playIPASounds');
-	var muteButton=document.getElementById('muteSounds');
-	if(soundBox){ playIPASounds=soundBox.checked; soundBox.onclick=function(){playIPASounds=this.checked;}; }
-	if(muteButton){ muteButton.onclick=function(){playIPASounds=false; if(soundBox)soundBox.checked=false; try{top.postMessage({type:'ipa-stop-sound'}, '*');}catch(e){} }; }
 	document.getElementById('insertEntities').onclick = function(){useEntities = this.checked};
+
+	var robotToggle = document.getElementById('robotVoiceToggle');
+	if(robotToggle){
+		robotVoiceEnabled = robotToggle.checked;
+		robotToggle.onclick = function(){robotVoiceEnabled = this.checked};
+	}
 	
 	//make the document unselectable so that repeated clicks don't select text
 	var ipachart = ipawin.document.getElementById('chart');
@@ -224,6 +249,11 @@ function init(){
 	if(document.addEventListener){ //allow the controls to be interactive
 		document.getElementById('clearButton').addEventListener('mousedown', overrideAbandonment, false);
 		document.getElementById('insertEntities').addEventListener('mousedown', overrideAbandonment, false);
+		if(robotToggle)
+			robotToggle.addEventListener('mousedown', overrideAbandonment, false);
+		var playAllBtn = document.getElementById('robotVoicePlayAll');
+		if(playAllBtn)
+			playAllBtn.addEventListener('mousedown', overrideAbandonment, false);
 	}
 	
 	//add event handlers to capture the characters

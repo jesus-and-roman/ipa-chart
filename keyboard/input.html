@@ -40,11 +40,13 @@ SOFTWARE.
 					<input id="insertEntities" type="checkbox" /><label for="insertEntities">&nbsp;Insert entities</label>
 				</span>
 				<input type="button" id="clearButton" onclick="clearField()" value="Clear" />
-				<label class="soundOption"><input id="playIPASounds" type="checkbox" checked="checked" /> Jouer les sons IPA</label>
-				<button type="button" id="muteSounds">Désactiver les sons</button>
 				<span id="instructions">Click on a symbol above to have it inputted below. Enter base characters before diacritics.</span>
 				<span id="symbolsUsedLabel">Previously used:</span>
 				<span id="symbolsUsed"></span>
+				<span id="robotVoiceBox" title="Lit à voix haute (voix synthétique/robot) chaque symbole ajouté ci-dessous">
+					<input id="robotVoiceToggle" type="checkbox" /><label for="robotVoiceToggle">&nbsp;🤖 Jouer les sons IPA (voix robot)</label>
+					<input type="button" id="robotVoicePlayAll" onclick="playAllRobotVoice()" value="▶ Lire tout" />
+				</span>
 			</div>
 			<div><textarea id="inputField" rows="5" cols="40"></textarea></div>
 			<!-- (Appreciate this chart? Consider purchasing an IPA Chart t-shirt or donating via PayPal&mdash;scroll down for more info)-->
