@@ -51,10 +51,4 @@ span#instructions
 span#symbolsUsed, span#symbolsUsedLabel{
 	display:none;
 }
-#soundControls {
-    background-color:#CCCCCC;
-    padding:2px 5px;
-    border:solid 1px gray;
-    margin-right:3px;
-}
-#soundControls button { font-size:11px; }
+span#soundBox { background-color:#CCCCCC; padding-right:3px; border:solid 1px gray; margin-right:3px; }

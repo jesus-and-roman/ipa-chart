@@ -34,6 +34,7 @@ var textarea_selection;
 var symbolsUsedBox;
 var useEntities = false;
 var useHex = true;
+var ipaSoundsEnabled = true;
 
 /*
 function mouseoverKey(){
@@ -127,11 +128,31 @@ function engageKey(){
 	timer = self.setTimeout("timer = self.setInterval('writekey()', repeatRate)", repeatDelay); //\"" + (pressedKey == '"' ? '\\\\"' : (pressedKey.match(/[\n']/) ? '\\' + pressedKey : pressedKey)) + "\"
 	writekey();
 	showSymbolsUsed();
+	playSelectedSound(pressedNode);
 
 	//if(this.nodeName.toLowerCase() == 'a'){
 	//	top.status = this.getAttribute('title');
 	//}
 };
+function playSelectedSound(node){
+	if(!ipaSoundsEnabled || !node) return;
+	var symbol = '';
+	try { symbol = (node.textContent || node.innerText || '').replace(/[\s\u25CC]/g, ''); } catch(e) {}
+	if(!symbol) return;
+	var chartWindow = (top.frames && top.frames[0]) ? top.frames[0] : top;
+	var data = chartWindow.IPAFeatureData && chartWindow.IPAFeatureData[symbol];
+	if(!data) return;
+	var audio = new Audio('../addon/img/' + data[5] + '.mp3');
+	audio.play().catch(function(){
+		if(window.speechSynthesis){
+			speechSynthesis.cancel();
+			var u = new SpeechSynthesisUtterance(data[3]);
+			u.lang = 'en-US'; u.rate = 0.72;
+			speechSynthesis.speak(u);
+		}
+	});
+}
+
 function disengageKey(){
 	pressedKey = 0;
 	self.clearInterval(timer);
@@ -175,6 +196,13 @@ function init(){
 	}
 
 	textarea = document.getElementById('inputField');
+	var soundToggle = document.getElementById('ipaSounds');
+	try { ipaSoundsEnabled = localStorage.getItem('ipaSoundsEnabled') !== '0'; } catch(e) {}
+	soundToggle.checked = ipaSoundsEnabled;
+	soundToggle.onclick = function(){
+		ipaSoundsEnabled = this.checked;
+		try { localStorage.setItem('ipaSoundsEnabled', ipaSoundsEnabled ? '1' : '0'); } catch(e) {}
+	};
 	ipawin = top.frames[0];
 	if(ipawin){
 		ipawin.document.getElementById('keyboardRefHead').style.display = 'none';
